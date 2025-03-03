@@ -2,19 +2,19 @@
 
 import { MessageCard } from '@/components/MessageCard';
 import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
 import { Message } from '@/model/User';
 import { acceptMessageSchema } from '@/schemas/acceptMessageSchema';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Separator } from '@/components/ui/separator';
-import { Switch } from '@/components/ui/switch';
 import axios, { AxiosError } from 'axios';
 import { Loader2, RefreshCcw } from 'lucide-react';
+import { User } from 'next-auth';
 import { useSession } from 'next-auth/react';
-import { useEffect, useState, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { ApiResponse } from '../../../types/ApiResponse';
-import { User } from 'next-auth';
 
 const Dashboard = () => {
 	const [messages, setMessages] = useState<Message[]>([]);
@@ -29,7 +29,7 @@ const Dashboard = () => {
 		},
 	});
 
-	const { register, watch, setValue } = form;
+	const { watch, setValue } = form;
 	const acceptMessages = watch('acceptMessages');
 
 	const handleDeleteMessage = (messageId: string) => {
@@ -38,9 +38,36 @@ const Dashboard = () => {
 		);
 	};
 
-	const fetchAcceptMessage = useCallback(async () => {
-		setIsSwitchLoading(true);
+	const fetchMessages = useCallback(
+		async (refresh: boolean = false) => {
+			if (!session?.user) return;
+			setIsLoading(true);
+			setIsSwitchLoading(true);
+			try {
+				const response = await axios.get<ApiResponse>('/api/get-messages');
+				setMessages(response.data.messages || []);
 
+				if (refresh) {
+					toast.info('Refreshed Messages', {
+						description: 'Showing latest messages',
+					});
+				}
+			} catch (error) {
+				const axiosError = error as AxiosError<ApiResponse>;
+				toast.error(
+					axiosError.response?.data.message ?? 'Failed to fetch messages'
+				);
+			} finally {
+				setIsLoading(false);
+				setIsSwitchLoading(false);
+			}
+		},
+		[session, setMessages]
+	);
+
+	const fetchAcceptMessage = useCallback(async () => {
+		if (!session?.user) return;
+		setIsSwitchLoading(true);
 		try {
 			const response = await axios.get<ApiResponse>('/api/accept-messages');
 			setValue('acceptMessages', response.data.isAcceptingMessages!);
@@ -52,34 +79,17 @@ const Dashboard = () => {
 		} finally {
 			setIsSwitchLoading(false);
 		}
-	}, [setValue]);
-
-	const fetchMessages = useCallback(async (refresh?: boolean) => {
-		setIsLoading(true);
-
-		try {
-			const response = await axios.get<ApiResponse>('/api/get-messages');
-			setMessages(response.data.messages || []);
-
-			if (refresh) {
-				toast('Refreshed Messages', { description: 'Showing latest messages' });
-			}
-		} catch (error) {
-			const axiosError = error as AxiosError<ApiResponse>;
-			toast.error(
-				axiosError.response?.data.message ?? 'Failed to fetch messages'
-			);
-		} finally {
-			setIsLoading(false);
-		}
-	}, []);
+	}, [session, setValue]);
 
 	useEffect(() => {
 		if (!session || !session.user) return;
 
-		fetchMessages();
-		fetchAcceptMessage();
-	}, [session, fetchMessages, fetchAcceptMessage]);
+		const fetchData = async () => {
+			await Promise.all([fetchMessages(), fetchAcceptMessage()]);
+		};
+
+		fetchData();
+	}, [session, fetchAcceptMessage, fetchMessages]);
 
 	const handleSwitchChange = async () => {
 		setIsSwitchLoading(true);

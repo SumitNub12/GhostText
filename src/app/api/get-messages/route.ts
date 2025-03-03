@@ -1,25 +1,25 @@
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../auth/[...nextauth]/options';
 import dbConnect from '@/lib/dbConnect';
 import UserModel from '@/model/User';
 import mongoose from 'mongoose';
-import { getServerSession, User } from 'next-auth';
-import { authOptions } from '../auth/[...nextauth]/options';
 
 export async function GET() {
 	await dbConnect();
 
 	const session = await getServerSession(authOptions);
-	const user = session?.user as User;
+	console.log('SESSION:', session); // Debugging
 
 	if (!session || !session.user) {
-		return Response.json(
-			{ success: false, message: 'Not authenticated' },
+		return new Response(
+			JSON.stringify({ success: false, message: 'Not authenticated' }),
 			{ status: 401 }
 		);
 	}
 
-	const userId = new mongoose.Types.ObjectId(user._id);
-
 	try {
+		const userId = new mongoose.Types.ObjectId(session.user._id); // Make sure _id is present
+
 		const result = await UserModel.aggregate([
 			{ $match: { _id: userId } },
 			{ $unwind: '$messages' },
@@ -32,18 +32,21 @@ export async function GET() {
 			},
 		]);
 
-		if (!user || result.length === 0) {
-			return Response.json(
-				{ success: false, message: 'No messages found' },
+		if (result.length === 0) {
+			return new Response(
+				JSON.stringify({ success: false, message: 'No messages found' }),
 				{ status: 404 }
 			);
 		}
 
-		return Response.json({ success: true, messages: result[0].messages });
-    } catch (error) {
-        console.error('Failed to fetch messages', error);
-		return Response.json(
-			{ success: false, message: 'Failed to fetch messages', error },
+		return new Response(
+			JSON.stringify({ success: true, messages: result[0].messages }),
+			{ status: 200 }
+		);
+	} catch (error) {
+		console.error('Failed to fetch messages', error);
+		return new Response(
+			JSON.stringify({ success: false, message: 'Failed to fetch messages' }),
 			{ status: 500 }
 		);
 	}

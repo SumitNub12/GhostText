@@ -27,10 +27,10 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang='en'>
-			<body
-				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-			>
-				<AuthProvider>
+			<AuthProvider>
+				<body
+					className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+				>
 					<Navbar />
 					{children}
 					<Toaster
@@ -38,8 +38,8 @@ export default function RootLayout({
 						position='bottom-center'
 						closeButton={true}
 					/>
-				</AuthProvider>
-			</body>
+				</body>
+			</AuthProvider>
 		</html>
 	);
 }

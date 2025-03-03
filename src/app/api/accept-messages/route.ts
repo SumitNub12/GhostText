@@ -1,58 +1,57 @@
+// src/app/api/accept-messages/route.ts
 import dbConnect from '@/lib/dbConnect';
 import UserModel from '@/model/User';
 import { getServerSession, User } from 'next-auth';
+import { NextRequest, NextResponse } from 'next/server';
 import { authOptions } from '../auth/[...nextauth]/options';
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
 	await dbConnect();
 
 	const session = await getServerSession(authOptions);
-
-	const user = session?.user as User;
-
 	if (!session || !session.user) {
-		return Response.json(
-			{ success: false, message: 'Not authenticated' },
+		return NextResponse.json(
+			{
+				success: false,
+				message: 'You need to log in to update your message settings.',
+			},
 			{ status: 401 }
 		);
 	}
 
-	const userId = user._id;
-
+	const user = session.user as User;
 	const { acceptMessages } = await request.json();
 
 	try {
 		const updatedUser = await UserModel.findByIdAndUpdate(
-			userId,
+			user._id,
 			{ isAcceptingMessages: acceptMessages },
 			{ new: true }
 		);
 
 		if (!updatedUser) {
-			return Response.json(
-				{
-					success: false,
-					message: 'Failed  to update user status to accept messages',
-				},
+			return NextResponse.json(
+				{ success: false, message: 'User not found. Please try again later.' },
 				{ status: 404 }
 			);
 		}
 
-		return Response.json(
+		return NextResponse.json(
 			{
 				success: true,
-				message: 'User status updated to accept messages',
-				updatedUser,
+				message:
+					acceptMessages ?
+						'You can now receive messages from others.'
+					:	'You have disabled message requests.',
 			},
 			{ status: 200 }
 		);
 	} catch (error) {
-		console.error('Failed to update user status to accept messages', error);
-
-		return Response.json(
+		console.error('Error updating message status:', error);
+		return NextResponse.json(
 			{
 				success: false,
-				message: 'Failed to update user status to update messages',
+				message: 'Something went wrong. Please try again later.',
 			},
 			{ status: 500 }
 		);
@@ -63,38 +62,41 @@ export async function GET() {
 	await dbConnect();
 
 	const session = await getServerSession(authOptions);
-
-	const user = session?.user as User;
-
 	if (!session || !session.user) {
-		return Response.json(
-			{ success: false, message: 'Not authenticated' },
+		return NextResponse.json(
+			{
+				success: false,
+				message: 'You need to log in to check your message settings.',
+			},
 			{ status: 401 }
 		);
 	}
 
-	const userId = user._id;
-
 	try {
-		const user = await UserModel.findById(userId);
+		const user = await UserModel.findById((session.user as User)._id);
 		if (!user) {
-			return Response.json(
-				{ success: false, message: 'User not found' },
+			return NextResponse.json(
+				{ success: false, message: 'User not found. Please try again later.' },
 				{ status: 404 }
 			);
-		} else {
-			return Response.json(
-				{ success: true, isAcceptingMessages: user.isAcceptingMessages },
-				{ status: 200 }
-			);
 		}
-	} catch (error) {
-		console.error('Failed to get user status to accept messages', error);
 
-		return Response.json(
+		return NextResponse.json(
+			{
+				success: true,
+				message:
+					user.isAcceptingMessages ?
+						'You are currently accepting messages.'
+					:	'You are not accepting messages right now.',
+			},
+			{ status: 200 }
+		);
+	} catch (error) {
+		console.error('Error fetching message status:', error);
+		return NextResponse.json(
 			{
 				success: false,
-				message: 'Failed to get user status to accept messages',
+				message: 'Something went wrong. Please try again later.',
 			},
 			{ status: 500 }
 		);
