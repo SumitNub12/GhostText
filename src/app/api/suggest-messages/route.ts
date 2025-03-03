@@ -1,32 +1,50 @@
-import { openai } from '@ai-sdk/openai';
-import { streamText } from 'ai';
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { generateText } from 'ai';
 import { NextResponse } from 'next/server';
-import OpenAI from 'openai';
 
-// Allow streaming responses up to 30 seconds
-export const maxDuration = 30;
+const google = createGoogleGenerativeAI({
+	apiKey: process.env.GOOGLE_GEMINI_API_KEY,
+});
 
 export async function POST() {
 	try {
-		const prompt =
-			"Create a list of three open-ended and engaging questions formatted as a single string. Each question should be separated by '||'. These questions are for an anonymous social messaging platform, like Qooh.me, and should be suitable for a diverse audience. Avoid personal or sensitive topics, focusing instead on universal themes that encourage friendly interaction. For example, your output should be structured like this: 'What's a hobby you've recently started?||If you could have dinner with any historical figure, who would it be?||What's a simple thing that makes you happy?'. Ensure the questions are intriguing, foster curiosity, and contribute to a positive and welcoming conversational environment.";
+		console.log('Starting AI suggestion generation...');
 
-		const result = streamText({
-			model: openai('gpt-3.5-turbo'),
-			maxTokens: 400,
-			prompt: prompt,
+		const prompt = `
+			Generate exactly three unique and engaging questions for an anonymous social messaging platform.
+			Each question **must** be separated by '||' **with no extra line breaks or spaces**.
+			Ensure that every response is different from previous ones and is creative.
+			Strictly follow this format:
+			Question 1 || Question 2 || Question 3
+
+			Examples:  
+			1. "If you could master any skill instantly, what would it be? || What's the best advice you've ever received? || What’s your dream travel destination?"  
+			2. "What's a fun fact about you that most people don’t know? || If you could have a superpower for a day, what would it be? || What’s your go-to comfort food?"
+
+			Generate fresh, diverse, and engaging questions every time. Do NOT repeat past examples.
+		`;
+
+		console.log('Sending request to Gemini AI...');
+		const model = google('gemini-2.0-flash-001');
+
+		// Generate text using Gemini AI with randomness (temperature)
+		const { text } = await generateText({
+			model,
+			system:
+				'You are an AI assistant generating fresh, engaging social conversation starters.',
+			prompt,
+			temperature: 0.9, // Increase randomness for diverse responses
 		});
 
-		return result.toDataStreamResponse();
-	} catch (err) {
-		if (err instanceof OpenAI.APIError) {
-			const { name, status, headers, message } = err;
+		console.log('AI Response:', text);
 
-			return NextResponse.json(
-				{ name, status, headers, message, msg: 'open ai api error' },
-				{ status }
-			);
-		}
-		console.error('An unexpected error occurred', err);
+		// Returning response to client
+		return NextResponse.json({ questions: text });
+	} catch (error) {
+		console.error('AI Request Failed:', error);
+		return NextResponse.json(
+			{ error: 'Failed to generate suggestions', details: error.message },
+			{ status: 500 }
+		);
 	}
 }

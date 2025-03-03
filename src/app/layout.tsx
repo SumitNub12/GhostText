@@ -1,8 +1,7 @@
-import Navbar from '@/components/Navbar';
 import { Toaster } from '@/components/ui/sonner';
 import AuthProvider from '@/context/AuthProvider';
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Fira_Mono, Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -10,14 +9,17 @@ export const metadata: Metadata = {
 	description: 'Real feedback from real people.',
 };
 
-const geistSans = Geist({
-	variable: '--font-geist-sans',
+const plusJakartaSans = Plus_Jakarta_Sans({
+	variable: '--font-plus-jakarta-sans',
 	subsets: ['latin'],
+	display: 'swap',
 });
 
-const geistMono = Geist_Mono({
-	variable: '--font-geist-mono',
+const firaMono = Fira_Mono({
+	variable: '--font-fira-mono',
 	subsets: ['latin'],
+	display: 'swap',
+	weight: ['400', '500', '700'],
 });
 
 export default function RootLayout({
@@ -29,9 +31,9 @@ export default function RootLayout({
 		<html lang='en'>
 			<AuthProvider>
 				<body
-					className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+					className={`${plusJakartaSans.variable} ${firaMono.variable} antialiased`}
 				>
-					<Navbar />
+					{/* <Navbar /> */}
 					{children}
 					<Toaster
 						richColors={true}
