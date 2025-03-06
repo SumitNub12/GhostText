@@ -1,4 +1,4 @@
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { createGoogleGenerativeAI, GoogleErrorData } from '@ai-sdk/google';
 import { generateText } from 'ai';
 import { NextResponse } from 'next/server';
 
@@ -31,7 +31,7 @@ export async function POST() {
 		const { text } = await generateText({
 			model,
 			system:
-				'You are an AI assistant generating fresh, engaging social conversation starters.',
+				'You are an AI assistant generating fresh and random, engaging social conversation starters.',
 			prompt,
 			temperature: 0.9, // Increase randomness for diverse responses
 		});
@@ -41,9 +41,10 @@ export async function POST() {
 		// Returning response to client
 		return NextResponse.json({ questions: text });
 	} catch (error) {
+		const err = error as GoogleErrorData;
 		console.error('AI Request Failed:', error);
 		return NextResponse.json(
-			{ error: 'Failed to generate suggestions', details: error.message },
+			{ error: 'Failed to generate suggestions', details: err.error.message },
 			{ status: 500 }
 		);
 	}

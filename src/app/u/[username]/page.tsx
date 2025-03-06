@@ -1,6 +1,13 @@
 'use client';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from '@/components/ui/dialog';
 import {
 	Form,
 	FormControl,
@@ -13,9 +20,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { messageSchema } from '@/schemas/messageSchema';
 import { ApiResponse } from '@/types/ApiResponse';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Separator } from '@radix-ui/react-separator';
 import axios, { AxiosError } from 'axios';
-import { Link, Loader2 } from 'lucide-react';
+import { Copy, Eye, Loader2, Send, Sparkles, Wand2 } from 'lucide-react';
+import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -24,11 +31,9 @@ import * as z from 'zod';
 
 const specialChar = '||';
 
-// Ensure AI response is correctly formatted
 const parseStringMessages = (messageString: string): string[] => {
 	if (!messageString || typeof messageString !== 'string') return [];
 
-	// Ensure AI response follows "||" format
 	const messages =
 		messageString.includes(specialChar) ?
 			messageString.split(specialChar)
@@ -37,7 +42,7 @@ const parseStringMessages = (messageString: string): string[] => {
 	return messages.map((msg) => msg.trim()).filter((msg) => msg.length > 0);
 };
 
-export default function Page() {
+export default function AnonymousMessagePage() {
 	const params = useParams();
 	const username = params.username as string;
 
@@ -48,6 +53,7 @@ export default function Page() {
 		'Do you have any pets?',
 		"What's your dream job?",
 	]);
+	const [selectedMessage, setSelectedMessage] = useState<string | null>(null);
 	const [error, setError] = useState<string | null>(null);
 
 	const form = useForm<z.infer<typeof messageSchema>>({
@@ -60,7 +66,6 @@ export default function Page() {
 
 	const messageContent = form.watch('content');
 
-	// Handle form submission
 	const onSubmit = async (data: z.infer<typeof messageSchema>) => {
 		setIsLoading(true);
 
@@ -82,7 +87,6 @@ export default function Page() {
 		}
 	};
 
-	// Fetch Suggested Messages
 	const fetchSuggestedMessages = async () => {
 		setIsSuggestLoading(true);
 		setError(null);
@@ -103,99 +107,164 @@ export default function Page() {
 		}
 	};
 
-	return (
-		<div className='container mx-auto my-8 p-6 bg-white rounded max-w-4xl'>
-			<h1 className='text-4xl font-bold mb-6 text-center'>
-				Public Profile Link
-			</h1>
-			<Form {...form}>
-				<form
-					onSubmit={form.handleSubmit(onSubmit)}
-					className='space-y-6'
-				>
-					<FormField
-						control={form.control}
-						name='content'
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Send Anonymous Message to @{username}</FormLabel>
-								<FormControl>
-									<Textarea
-										placeholder='Write your anonymous message here'
-										className='resize-none'
-										disabled={isSuggestLoading || isLoading}
-										{...field}
-									/>
-								</FormControl>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-					<div className='flex justify-center'>
-						{isLoading ?
-							<Button disabled>
-								<Loader2 className='mr-2 h-4 w-4 animate-spin' />
-								Please wait
-							</Button>
-						:	<Button
-								type='submit'
-								disabled={isLoading || !messageContent || isSuggestLoading}
-							>
-								Send It
-							</Button>
-						}
-					</div>
-				</form>
-			</Form>
+	const copyProfileLink = () => {
+		const profileLink = `${window.location.origin}/u/${username}`;
+		navigator.clipboard.writeText(profileLink);
+		toast.success('Profile link copied to clipboard');
+	};
 
-			<div className='space-y-4 my-8'>
-				<div className='space-y-2'>
-					<Button
-						onClick={fetchSuggestedMessages}
-						className='my-4'
-						disabled={isSuggestLoading || isLoading}
-					>
-						{isSuggestLoading ?
-							<>
-								<Loader2 className='mr-2 h-4 w-4 animate-spin' />
-								Loading...
-							</>
-						:	'Suggest Messages'}
-					</Button>
-					<p>Click on any message below to select it.</p>
+	return (
+		<div className='min-h-screen bg-background py-12 px-4 sm:px-6 lg:px-8'>
+			<div className='max-w-2xl mx-auto space-y-8'>
+				<div className='text-center'>
+					<h1 className='text-4xl font-extrabold text-foreground mb-4'>
+						Anonymous Messenger
+					</h1>
+					<p className='text-muted-foreground'>
+						Send a message to @{username} anonymously
+					</p>
 				</div>
-				<Card>
+
+				<Card className='shadow-lg hover:shadow-xl transition-shadow duration-300'>
 					<CardHeader>
-						<h3 className='text-xl font-semibold'>Messages</h3>
+						<CardTitle className='flex items-center justify-between'>
+							<span>Send an Anonymous Message</span>
+							<Button
+								variant='outline'
+								size='sm'
+								onClick={copyProfileLink}
+							>
+								<Copy className='mr-2 h-4 w-4' /> Copy Profile Link
+							</Button>
+						</CardTitle>
 					</CardHeader>
-					<CardContent className='flex flex-col space-y-4'>
-						{error ?
-							<p className='text-red-500'>{error}</p>
-						: isSuggestLoading ?
-							<div className='flex items-center justify-center'>
-								<Loader2 className='h-6 w-6 animate-spin text-gray-500' />
-							</div>
-						: suggestedMessages.length > 0 ?
-							suggestedMessages.map((message, index) => (
-								<Button
-									key={index}
-									variant='outline'
-									className='mb-2'
-									onClick={() => handleMessageClick(message)}
-								>
-									{message}
-								</Button>
-							))
-						:	<p>No suggested messages available.</p>}
+					<CardContent>
+						<Form {...form}>
+							<form
+								onSubmit={form.handleSubmit(onSubmit)}
+								className='space-y-6'
+							>
+								<FormField
+									control={form.control}
+									name='content'
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Your Message</FormLabel>
+											<FormControl>
+												<Textarea
+													placeholder='Write your anonymous message here...'
+													className='resize-none min-h-[150px] max-h-[300px]'
+													disabled={isSuggestLoading || isLoading}
+													{...field}
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+								<div className='flex justify-center'>
+									<Button
+										type='submit'
+										size='lg'
+										disabled={isLoading || !messageContent || isSuggestLoading}
+									>
+										{isLoading ?
+											<Loader2 className='mr-2 h-4 w-4 animate-spin' />
+										:	<Send className='mr-2 h-4 w-4' />}
+										Send Message
+									</Button>
+								</div>
+							</form>
+						</Form>
 					</CardContent>
 				</Card>
-			</div>
-			<Separator className='my-6' />
-			<div className='text-center'>
-				<div className='mb-4'>Get Your Message Board</div>
-				<Link href={'/sign-up'}>
-					<Button>Create Your Account</Button>
-				</Link>
+
+				<Card className='shadow-md'>
+					<CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+						<CardTitle className='text-xl'>Suggested Messages</CardTitle>
+						<Button
+							variant='ghost'
+							size='sm'
+							onClick={fetchSuggestedMessages}
+							disabled={isSuggestLoading || isLoading}
+						>
+							{isSuggestLoading ?
+								<Loader2 className='mr-2 h-4 w-4 animate-spin' />
+							:	<Wand2 className='mr-2 h-4 w-4' />}
+							Regenerate
+						</Button>
+					</CardHeader>
+					<CardContent>
+						{error ?
+							<p className='text-destructive'>{error}</p>
+						: isSuggestLoading ?
+							<div className='flex items-center justify-center'>
+								<Loader2 className='h-6 w-6 animate-spin text-muted-foreground' />
+							</div>
+						: suggestedMessages.length > 0 ?
+							<div className='space-y-3'>
+								{suggestedMessages.map((message, index) => (
+									<div
+										key={index}
+										className='flex items-center space-x-2'
+									>
+										<Button
+											variant='outline'
+											className='flex-1 overflow-hidden justify-start text-left'
+											onClick={() => handleMessageClick(message)}
+										>
+											<Sparkles className='mr-2 h-4 w-4 text-primary flex-shrink-0' />
+											<span className='line-clamp-2'>{message}</span>
+										</Button>
+										<Dialog>
+											<DialogTrigger asChild>
+												<Button
+													variant='ghost'
+													size='icon'
+													onClick={() => setSelectedMessage(message)}
+												>
+													<Eye className='h-4 w-4' />
+												</Button>
+											</DialogTrigger>
+											<DialogContent>
+												<DialogHeader>
+													<DialogTitle>Suggested Message</DialogTitle>
+												</DialogHeader>
+												<div className='p-4 bg-muted rounded-lg'>
+													<p className='text-foreground'>{selectedMessage}</p>
+												</div>
+												<div className='flex justify-end space-x-2'>
+													<Button
+														variant='outline'
+														onClick={() => {
+															if (selectedMessage) {
+																handleMessageClick(selectedMessage);
+															}
+														}}
+													>
+														Use Message
+													</Button>
+												</div>
+											</DialogContent>
+										</Dialog>
+									</div>
+								))}
+							</div>
+						:	<p className='text-muted-foreground text-center'>
+								No suggested messages available.
+							</p>
+						}
+					</CardContent>
+				</Card>
+
+				<div className='text-center'>
+					<p className='text-muted-foreground mb-4'>
+						Don't have an account yet?
+					</p>
+					<Link href={'/sign-up'}>
+						<Button variant='secondary'>Create Your Message Board</Button>
+					</Link>
+				</div>
 			</div>
 		</div>
 	);
