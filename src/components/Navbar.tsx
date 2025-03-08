@@ -6,11 +6,10 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { LogIn, Menu, MessageCircle, User, X } from 'lucide-react';
+import { LogIn, Menu, MessageCircle, X } from 'lucide-react';
 import { signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useState } from 'react';
-import { ThemeScript } from './theme-script';
 import { Button } from './ui/button';
 
 function Navbar() {
@@ -28,36 +27,35 @@ function Navbar() {
 	};
 
 	return (
-		<header
-			className='sticky top-0 z-50 w-full border-b border-border bg-background/95 
-      backdrop-blur supports-[backdrop-filter]:bg-background/60'
-		>
-			<ThemeScript />
+		<header className='sticky top-0 z-50 w-full border-b border-primary/10 bg-background/60 backdrop-blur-lg'>
 			<div className='w-full max-w-screen-xl mx-auto flex h-16 items-center px-4 md:px-10'>
 				{/* Logo */}
 				<div className='mr-4 flex flex-1'>
 					<Link
 						href='/'
-						className='flex items-center space-x-2'
+						className='flex items-center space-x-2 group hover-lift'
 					>
-						<MessageCircle className='h-6 w-6 text-primary' />
-						<span className='font-bold text-foreground'>Whisper</span>
+						<div className='relative'>
+							<div className='absolute -inset-1 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-full blur opacity-0 group-hover:opacity-100 transition-opacity duration-500' />
+							<MessageCircle className='h-6 w-6 text-primary relative' />
+						</div>
+						<span className='font-bold text-primary'>Whisper</span>
 					</Link>
 				</div>
 
 				{/* Desktop Navigation */}
 				<div className='hidden md:flex items-center space-x-4'>
-					<nav className='flex items-center space-x-2'>
+					<nav className='flex items-center space-x-4'>
 						{session ?
 							<>
-								<span className='mr-4 text-muted-foreground'>
+								<span className='text-muted-foreground'>
 									Welcome, {user.username || user.email}
 								</span>
 								<Link href='/dashboard'>
 									<Button
 										variant='ghost'
 										size='sm'
-										className='hover:bg-accent hover:text-accent-foreground'
+										className='hover:bg-primary/10 hover:text-primary hover-lift'
 									>
 										<MessageCircle className='mr-2 h-4 w-4' />
 										Messages
@@ -66,7 +64,8 @@ function Navbar() {
 								<Button
 									onClick={handleSignOut}
 									size='sm'
-									className='bg-destructive text-destructive-foreground hover:bg-destructive/90'
+									variant='outline'
+									className='border-primary/50  text-destructive-foreground   hover:bg-destructive/10 bg-destructive  hover-lift'
 								>
 									Logout
 								</Button>
@@ -74,20 +73,24 @@ function Navbar() {
 						:	<Link href='/sign-in'>
 								<Button
 									size='sm'
-									className='bg-primary text-primary-foreground hover:bg-primary/90'
+									className='hover-glow btn-pulse'
 								>
 									<LogIn className='mr-2 h-4 w-4' />
 									Login
 								</Button>
 							</Link>
 						}
-						<ThemeToggle />
+						<div className='hover-lift'>
+							<ThemeToggle />
+						</div>
 					</nav>
 				</div>
 
 				{/* Mobile Navigation */}
 				<div className='md:hidden flex items-center space-x-2'>
-					<ThemeToggle />
+					<div className='hover-lift'>
+						<ThemeToggle />
+					</div>
 					<DropdownMenu
 						open={isMenuOpen}
 						onOpenChange={setIsMenuOpen}
@@ -97,6 +100,7 @@ function Navbar() {
 								variant='ghost'
 								size='icon'
 								onClick={toggleMenu}
+								className='hover:bg-primary/10 hover:text-primary hover-lift'
 							>
 								{isMenuOpen ?
 									<X className='h-6 w-6' />
@@ -105,7 +109,7 @@ function Navbar() {
 						</DropdownMenuTrigger>
 						<DropdownMenuContent
 							align='end'
-							className='w-56'
+							className='w-56 bg-card/80 backdrop-blur-sm border-primary/10 animate-slide-up'
 						>
 							{session ?
 								<>
@@ -113,26 +117,27 @@ function Navbar() {
 										Welcome, {user.username || user.email}
 									</DropdownMenuItem>
 									<Link href='/dashboard'>
-										<DropdownMenuItem onSelect={() => setIsMenuOpen(false)}>
+										<DropdownMenuItem
+											onSelect={() => setIsMenuOpen(false)}
+											className='hover:bg-primary/10 hover:text-primary focus:bg-primary/10 focus:text-primary'
+										>
 											<MessageCircle className='mr-2 h-4 w-4' />
 											Messages
 										</DropdownMenuItem>
 									</Link>
-									<Link href='/profile'>
-										<DropdownMenuItem onSelect={() => setIsMenuOpen(false)}>
-											<User className='mr-2 h-4 w-4' />
-											Profile
-										</DropdownMenuItem>
-									</Link>
+
 									<DropdownMenuItem
 										onSelect={handleSignOut}
-										className='text-destructive focus:bg-destructive/10'
+										className='text-destructive-foreground focus:bg-destructive bg-destructive'
 									>
 										Logout
 									</DropdownMenuItem>
 								</>
 							:	<Link href='/sign-in'>
-									<DropdownMenuItem onSelect={() => setIsMenuOpen(false)}>
+									<DropdownMenuItem
+										onSelect={() => setIsMenuOpen(false)}
+										className='hover:bg-primary/10 hover:text-primary focus:bg-primary/10 focus:text-primary'
+									>
 										<LogIn className='mr-2 h-4 w-4' />
 										Login
 									</DropdownMenuItem>
