@@ -27,7 +27,7 @@ function Navbar() {
 	};
 
 	return (
-		<header className='sticky top-0 z-50 w-full border-b border-primary/10 bg-background/60 backdrop-blur-lg'>
+		<header className='sticky top-0 z-50 w-full border-b border-primary/10 bg-background/60 backdrop-blur-lg overflow-hidden'>
 			<div className='w-full max-w-screen-xl mx-auto flex h-16 items-center px-4 md:px-10'>
 				{/* Logo */}
 				<div className='mr-4 flex flex-1'>
@@ -48,7 +48,7 @@ function Navbar() {
 					<nav className='flex items-center space-x-4'>
 						{session ?
 							<>
-								<span className='text-muted-foreground'>
+								<span className='text-muted-foreground truncate max-w-[150px]'>
 									Welcome, {user.username || user.email}
 								</span>
 								<Link href='/dashboard'>
@@ -65,7 +65,7 @@ function Navbar() {
 									onClick={handleSignOut}
 									size='sm'
 									variant='outline'
-									className='border-primary/50  text-destructive-foreground   hover:bg-destructive/10 bg-destructive  hover-lift'
+									className='border-primary/50 text-destructive-foreground bg-destructive hover:bg-destructive/10 hover-lift'
 								>
 									Logout
 								</Button>
@@ -109,11 +109,11 @@ function Navbar() {
 						</DropdownMenuTrigger>
 						<DropdownMenuContent
 							align='end'
-							className='w-56 bg-card/80 backdrop-blur-sm border-primary/10 animate-slide-up'
+							className='w-[220px] bg-card/80 backdrop-blur-md border-primary/10 animate-slide-up overflow-hidden'
 						>
 							{session ?
 								<>
-									<DropdownMenuItem className='text-muted-foreground cursor-default'>
+									<DropdownMenuItem className='text-muted-foreground cursor-default truncate'>
 										Welcome, {user.username || user.email}
 									</DropdownMenuItem>
 									<Link href='/dashboard'>
@@ -125,7 +125,6 @@ function Navbar() {
 											Messages
 										</DropdownMenuItem>
 									</Link>
-
 									<DropdownMenuItem
 										onSelect={handleSignOut}
 										className='text-destructive-foreground focus:bg-destructive bg-destructive'
