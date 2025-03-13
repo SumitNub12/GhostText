@@ -31,8 +31,8 @@ GhostText is a secure and anonymous messaging platform where users can receive a
 Clone the repository:
 
 ```sh
-git clone https://github.com/SumitNub12/GhostText.git
-cd GhostText
+git clone https://github.com/SumitNub12/ghost-text.git
+cd ghost-text
 ```
 
 Install dependencies:
