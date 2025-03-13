@@ -68,7 +68,6 @@ export const authOptions: NextAuthOptions = {
 				token.isAcceptingMessages = user.isAcceptingMessages;
 				token.username = user.username;
 			}
-			console.log(token);
 			return token;
 		},
 		async session({ session, token }: { session: Session; token: JWT }) {

@@ -8,7 +8,6 @@ export async function GET() {
 	await dbConnect();
 
 	const session = await getServerSession(authOptions);
-	console.log('SESSION:', session); // Debugging
 
 	if (!session || !session.user) {
 		return new Response(

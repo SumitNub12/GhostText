@@ -99,7 +99,7 @@ const Page = () => {
 			<div className='w-full max-w-md p-8 bg-card rounded-lg shadow-md border-1 border-border'>
 				<div className='text-center '>
 					<h1 className='text-4xl font-extrabold tracking-tight lg:text-5xl mb-6'>
-						Join Whisper
+						Join GhostText
 					</h1>
 
 					<p className='mb-4'>Sign up to start your anonymous adventure </p>

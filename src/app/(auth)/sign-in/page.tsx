@@ -65,7 +65,7 @@ const Page = () => {
 			<div className='w-full max-w-md p-8 bg-card rounded-lg shadow-md border-1 border-border'>
 				<div className='text-center'>
 					<h1 className='text-4xl font-extrabold tracking-tight lg:text-5xl mb-6 text-foreground'>
-						Welcome back to Whisper
+						Welcome back to GhostText
 					</h1>
 
 					<p className='mb-4 text-muted-foreground'>

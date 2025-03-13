@@ -39,7 +39,7 @@ function Navbar() {
 							<div className='absolute -inset-1 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-full blur opacity-0 group-hover:opacity-100 transition-opacity duration-500' />
 							<MessageCircle className='h-6 w-6 text-primary relative' />
 						</div>
-						<span className='font-bold text-primary'>Whisper</span>
+						<span className='font-bold text-primary'>GhostText</span>
 					</Link>
 				</div>
 

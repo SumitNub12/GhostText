@@ -8,7 +8,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 
 export const metadata: Metadata = {
-	title: 'Whisper',
+	title: 'GhostText',
 	description: 'Real feedback from real people.',
 };
 

@@ -58,7 +58,7 @@ export default function Home() {
 										</p>
 									</div>
 									<div className='flex flex-col sm:flex-row gap-4 justify-center lg:justify-start animate-slide-up delay-300'>
-										<Link href='/signup'>
+										<Link href='/sign-up'>
 											<Button
 												size='lg'
 												className='w-full sm:w-auto group relative overflow-hidden font-medium btn-pulse'
@@ -162,7 +162,7 @@ export default function Home() {
 				<footer className='border-t border-primary/10 bg-background/80 backdrop-blur-sm py-8'>
 					<div className='container mx-auto flex flex-col md:flex-row items-center justify-between gap-4'>
 						<p className='text-sm text-muted-foreground'>
-							© {year} Whisper. All rights reserved.
+							© {year} GhostText. All rights reserved.
 						</p>
 						<div className='flex gap-6'>
 							<Link

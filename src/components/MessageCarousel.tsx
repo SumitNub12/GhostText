@@ -15,7 +15,7 @@ const messages = [
 	},
 	{
 		id: 2,
-		text: "I've been looking for a safe space to express myself. Whisper is exactly what I needed!",
+		text: "I've been looking for a safe space to express myself. GhostText is exactly what I needed!",
 		name: 'Secret Sharer',
 		avatar: '/img/leo.jpg',
 		initials: 'SS',
